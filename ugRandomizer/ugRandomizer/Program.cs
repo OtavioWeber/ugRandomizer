@@ -29,7 +29,8 @@ namespace ugRandomizer
         public static bool UserProfileEnabled;
         public static string UserProfilePath;
         public static List<Chord> chords;
-        public static string filePath;
+        public static string configsPath;
+        public static string jsonPath;
         public static Random rng;
 
         static void Main(string[] args)
@@ -98,7 +99,8 @@ namespace ugRandomizer
             autoScrollEnabled = (ConfigurationManager.AppSettings["autoScrollEnabled"].Equals("true"));
             UserProfileEnabled = (ConfigurationManager.AppSettings["UserProfileEnabled"].Equals("true"));
             UserProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + ConfigurationManager.AppSettings["UserProfilePath"];
-            filePath = Environment.CurrentDirectory + "\\chords.json";
+            configsPath = Environment.CurrentDirectory + "\\configs";
+            jsonPath = configsPath + "\\chords.json";
         }
 
         public static EnumAction Login()
@@ -138,10 +140,13 @@ namespace ugRandomizer
         {
             try
             {
-                if (File.Exists(filePath))
+                if (!Directory.Exists(configsPath))
+                    Directory.CreateDirectory(configsPath);
+
+                if (File.Exists(jsonPath))
                 {
-                    var json = File.ReadAllText(filePath);
-                    var days = Convert.ToInt32((DateTime.Now - File.GetLastWriteTime(filePath)).TotalDays);
+                    var json = File.ReadAllText(jsonPath);
+                    var days = Convert.ToInt32((DateTime.Now - File.GetLastWriteTime(jsonPath)).TotalDays);
                     if (json.Length > 0 && days <= 30)
                         chords = JsonConvert.DeserializeObject<List<Chord>>(json);
                     if (chords.Count > 0)
@@ -177,6 +182,7 @@ namespace ugRandomizer
 
                     if (WaitForElementLoad(ratingWhy, 1))
                     {
+                        // closes an annoying popup if existing
                         Driver.FindElement(ratingWhy).Click();
                         Driver.FindElement(ratingNeverAgain).Click();
                         Console.WriteLine("Popup closed.");
@@ -184,10 +190,9 @@ namespace ugRandomizer
 
                     if (autoScrollEnabled)
                     {
+                        // sends the "+" key to begin auto scroll
                         for (var i = 0; i < 3; i++)
-                        {
                             js.ExecuteScript("(function() {var e = new Event('keydown'); e.which = e.keyCode = 107; document.dispatchEvent(e); })();");
-                        }
                     }
                     return EnumAction.Idle;
                 }
@@ -234,9 +239,9 @@ namespace ugRandomizer
                     chords.Add(chord);
                     Console.Write("\r{0}/{1}", i + 1, chordsList.Count);
                 }
-                //var json = new JavaScriptSerializer().Serialize(chords);
+
                 var json = JsonConvert.SerializeObject(chords.ToArray());
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(jsonPath, json);
 
                 if (chords.Count > 0)
                 {
@@ -270,7 +275,7 @@ namespace ugRandomizer
                     Console.WriteLine();
                     return EnumAction.Get;
                 case "U":
-                    File.WriteAllText(filePath, string.Empty);
+                    File.WriteAllText(jsonPath, string.Empty);
                     chords.Clear();
                     Console.WriteLine("\nUpdating...");
                     return EnumAction.Get;

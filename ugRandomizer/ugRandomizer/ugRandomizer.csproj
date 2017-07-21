@@ -91,8 +91,6 @@
     <Content Include="drivers\chromedriver.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="if_button-shuffle_basic_yellow_70036.ico" />
-    <Content Include="if_button-shuffle_yellow_69268.ico" />
     <Content Include="if_Guitar_Pro_59629.ico" />
   </ItemGroup>
   <ItemGroup>
