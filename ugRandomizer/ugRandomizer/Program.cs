@@ -105,10 +105,10 @@ namespace ugRandomizer
 
         public static EnumAction Login()
         {
-            var signIn = By.CssSelector("a.auth_sign_in");
-            var username = By.Name("username");
-            var password = By.Name("pass");
-            var submit = By.CssSelector("input.sign");
+            var signIn = By.CssSelector("a.js-auth-sign-in-btn");
+            var username = By.CssSelector(".auth--js-form-sign-in > input.ug-auth--input[name='username']");
+            var password = By.CssSelector(".auth--js-form-sign-in > input.ug-auth--input[name='password']");
+            var submit = By.CssSelector("input[type='submit'][value='Sign in']");
             var userHeader = By.CssSelector("#username_header");
 
             try
@@ -119,9 +119,12 @@ namespace ugRandomizer
                 {
                     Console.WriteLine("Logging in...");
                     Driver.FindElement(signIn).Click();
-                    Driver.FindElement(username).SendKeys(ugUsername);
-                    Driver.FindElement(password).SendKeys(ugPassword);
-                    Driver.FindElement(submit).Click();
+                    if (WaitForElementLoad(submit, 1))
+                    {
+                        Driver.FindElement(username).SendKeys(ugUsername);
+                        Driver.FindElement(password).SendKeys(ugPassword);
+                        Driver.FindElement(submit).Click();
+                    }
                 }
                 WaitForElementLoad(userHeader, 10);
 
